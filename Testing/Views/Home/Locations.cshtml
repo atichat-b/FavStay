@@ -1,0 +1,30 @@
+﻿@model IEnumerable<Testing.Models.ProjectModel>
+@{
+    ViewBag.Title = "Locations";
+}
+
+<h2>@ViewBag.LocationName</h2>
+
+<div class="row">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="col-xs-8 text-center">Projects</th>
+                <th class="col-xs-4 text-center">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="~/Home/Rooms/@item.Id"><strong>@item.Name</strong></a>
+                    </td>
+                    <td class="text-center">                    
+                        <p><strong>@item.CountRoom Rooms</strong></p>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FavStay Testing</title>
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <script src="~/Content/js/jquery-1.12.2.min.js"></script>
+    <script src="~/Content/js/jquery-ui.min.js"></script>
+    <script src="~/Content/js/bootstrap.min.js"></script>
+    <style>
+        .navbar-default {
+            padding: 10px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar navbar-default">
+        <div class="container">
+            @{
+                string actionName = HttpContext.Current.Request.RequestContext.RouteData.Values["Action"].ToString();
+                if (actionName != "Index" && actionName != "Reservation")
+                {
+                    <a href="javascript:void(0);" class="btn btn-default pull-left" onclick="javascript: history.back()"><</a>
+                }
+                if (actionName != "Reservation")
+                {
+                    <a href="~/Home/Reservation" class="btn btn-success pull-right" role="button">Booking</a>
+                }
+                if (actionName == "Reservation")
+                {
+                    <p class="text-center">
+                        <strong>จองห้องพัก</strong>
+                    </p>
+                }
+            }
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+    </div>
+</body>
+</html>

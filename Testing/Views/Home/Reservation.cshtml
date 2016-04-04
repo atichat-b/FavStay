@@ -1,0 +1,197 @@
+﻿@model Testing.Models.ReservationModel
+
+@{
+    ViewBag.Title = "Reservation";
+}
+
+<h2>Reservation</h2>
+<div class="panel panel-default">
+    <div class="panel-body">
+        @using (Html.BeginForm("ReservRoom", "Home", FormMethod.Post, new { name = "myForm", @class = "form-horizontal" }))
+        {
+            <div class="form-group">
+                <div class="col-md-12">
+                    <p><strong>เลือก Location</strong></p>
+                    @Html.DropDownList("LocationList", null, "---- Select Location ----", new { @class = "form-control" })
+                </div>
+            </div>
+
+            @*<div class="form-group">
+                    <div class="col-md-12">
+                        <p><strong>เลือก Location</strong></p>
+                        @Html.DropDownListFor(x => x.selected, Model.lsLocations, new { @class = "form-control", @id = "Location", @onchange = "FillCity()" })
+                    </div>
+                </div>*@
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <p><strong>เลือก Project</strong></p>
+                    @Html.DropDownListFor(m => m.ProjectList, new SelectList(Enumerable.Empty<SelectListItem>()), "---- Select Project ----", new { @class = "form-control", @id = "ProjectList" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-12">
+                    <p><strong>เลือก Rooms</strong></p>
+                    @Html.DropDownListFor(m => m.RoomsList, new SelectList(Enumerable.Empty<SelectListItem>()), "---- Select Rooms ----", new { @class = "form-control", @id = "RoomList" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3"><strong>วันเข้าพัก</strong></div>
+                <div class="col-md-9">
+                    @Html.TextBoxFor(m => m.CheckInDate, new { @class = "form-control" })
+                    @*<input type="text" id="CheckInDate" name="CheckInDate" class="form-control">*@
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3"><strong>วันออก</strong></div>
+                <div class="col-md-9">
+                    @Html.TextBoxFor(m => m.CheckOutDate, new { @class = "form-control" })
+                    @*<input type="text" id="CheckOutDate" name="CheckOutDate" class="form-control">*@
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3 col-xs-4">
+                    <strong>จำนวนคน</strong>
+                </div>
+                <div class="col-md-1 col-xs-1"><button id="GuestMinus" type="button" class="btn btn-default pull-right">-</button></div>
+                <div class="col-md-7 col-xs-5">
+                    @Html.TextBoxFor(m => m.GuestAmount, new { @class = "form-control text-center", @Value = "1" })
+                    @*<input type="text" id="GuestAmount" name="GuestAmount" class="form-control text-center" value="1">*@
+                </div>
+                <div class="col-md-1 col-xs-1"><button id="GuestPlus" type="button" class="btn btn-default">+</button></div>
+
+            </div>
+            <div class="form-group">
+                <div class="col-md-8 col-xs-8">
+                    <a href="~/Home/Index">
+                        ยกเลิก
+                    </a>
+                </div>
+                <div class="col-md-4 col-xs-4">
+                    <button type="submit" class="btn btn-primary pull-right">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    $('#CheckInDate').datepicker({
+        dateFormat: 'yy/mm/dd',
+        minDate: 0,
+        onSelect: function () {
+            $('#CheckOutDate').datepicker('destroy');
+            var date2 = $('#CheckInDate').datepicker('getDate', '+1d');
+            date2.setDate(date2.getDate() + 1);
+            $('#CheckOutDate').datepicker({
+                dateFormat: "yy/mm/dd",
+                minDate: date2
+                //onSelect: function () {
+                //    //Do whatever you want to do
+                //}
+            });
+        }
+    });
+
+    //$('#CheckInDate').datepicker({
+    //    dateFormat: 'yy/mm/dd',
+    //    minDate: 0,
+    //});
+
+    //$('#CheckOutDate').datepicker({
+    //    dateFormat: 'yy/mm/dd',
+    //    minDate: 1,
+    //});
+
+    $('#GuestMinus').click(function () {
+        var x = parseFloat($("#GuestAmount").val());
+        if (x >= 2) {
+            var sum = x - 1;
+            $("#GuestAmount").val(sum);
+        }
+    });
+
+    $('#GuestPlus').click(function () {
+        var x = parseFloat($("#GuestAmount").val());
+        if (x <= 8) {
+            var sum = x + 1;
+            $("#GuestAmount").val(sum);
+        }
+    });
+
+    $('#LocationList').change(function () {
+        var strSelected = $('#LocationList').val();
+        $.getJSON('/Home/DDLGetProject/' + strSelected, function (result) {
+            var ddl = $('#ProjectList');
+            $('#RoomList').val("---- Select Rooms ----")
+            ddl.empty();
+            $(result).each(function () {
+                if (this.Name == null) {
+                    var ddlroom = $('#RoomList');
+                    ddlroom.empty();
+                    $(document.createElement('option'))
+                        .text("Project Not Found")
+                        .appendTo(ddl);
+
+                    $(document.createElement('option'))
+                        .text("Rooms Not Found")
+                        .appendTo(ddlroom);
+                }
+                else {
+                    $(document.createElement('option'))
+                        .attr('value', this.Id)
+                        .text(this.Name)
+                        .appendTo(ddl);
+                    GetRoomList();
+                }
+            });
+        })
+    });
+
+    $('#ProjectList').change(function () {
+        var strSelected = $('#ProjectList').val();
+        $.getJSON('/Home/DDLGetRooms/' + strSelected, function (result) {
+            var ddl = $('#RoomList');
+            ddl.empty();
+            $(result).each(function () {
+                if (this.Title == null) {
+                    $(document.createElement('option'))
+                        .text("Rooms Not Found")
+                        .appendTo(ddl);
+                }
+                else {
+                    $(document.createElement('option'))
+                        .attr('value', this.Id)
+                        .text(this.Title)
+                        .appendTo(ddl);
+                }
+            });
+        })
+    });
+
+    function GetRoomList() {
+        var strSelected = $('#ProjectList').val();
+        $.getJSON('/Home/DDLGetRooms/' + strSelected, function (result) {
+            var ddl = $('#RoomList');
+            ddl.empty();
+            $(result).each(function () {
+                if (this.Title == null) {
+                    $(document.createElement('option'))
+                        .text("Rooms Not Found")
+                        .appendTo(ddl);
+                }
+                else {
+                    $(document.createElement('option'))
+                        .attr('value', this.Id)
+                        .text(this.Title)
+                        .appendTo(ddl);
+                }
+            });
+        })
+    }
+</script>
